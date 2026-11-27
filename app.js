@@ -605,14 +605,15 @@ function desenhar(cod, d) {
 
   // limites do dia inteiro; o zoom do usuário é mantido entre atualizações
   const ini = new Date(`${$('dia').value}T00:00:00-03:00`).getTime();
-  const x = g.options.scales.x;
   if (!isNaN(ini)) {
-    const novoDia = x.min !== undefined && (g.$ini !== ini);
+    const novoDia = g.$ini !== undefined && g.$ini !== ini;
     g.$ini = ini;
     if (g.options.plugins?.zoom) g.options.plugins.zoom.limits.x = { min: ini, max: ini + 864e5, minRange: 3600e3 };
     const z = g.isZoomedOrPanned && g.isZoomedOrPanned() && !novoDia;
+    // ao trocar de dia, o plugin de zoom restaura os limites que guardou (os do dia anterior) e troca o
+    // objeto de opções do eixo; por isso o eixo é lido de novo depois do reset e o dia é aplicado na sequência
     if (novoDia && g.resetZoom) g.resetZoom('none');
-    if (!z) { x.min = ini; x.max = ini + 864e5; }
+    if (!z) { const x = g.options.scales.x; x.min = ini; x.max = ini + 864e5; }
   }
   g.update('none');
 
