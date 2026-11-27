@@ -4,112 +4,152 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Painel de Carga ONS</title>
+<meta name="description" content="Painel Eneva: carga verificada e prevista do Amazonas, Amapá e Roraima, com dados do ONS via SINtegre.">
+<meta name="theme-color" content="#062f31">
+<link rel="preload" href="fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="estilo.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"
         integrity="sha384-dug+JxfBvklEQdJ4AYuBBAIScUz0bVN73xpy273gcAwHjb3qI0fXmuYNaNfdyYJG" crossorigin="anonymous"></script>
-<style>
-  :root { --bg:#f6f7f9; --card:#fff; --txt:#1b1f24; --mut:#5f6b7a; --brd:#e3e6ea;
-          --verif:#1f6feb; --prev:#d97706; --ok:#1a7f37; --warn:#b54708; --err:#c62828; }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg:#0f1216; --card:#171b21; --txt:#e6e9ee; --mut:#98a2b3; --brd:#2a3039;
-            --verif:#58a6ff; --prev:#f0a030; --ok:#3fb950; --warn:#f0a030; --err:#ff6b6b; }
-  }
-  * { box-sizing:border-box }
-  body { margin:0; font:14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:var(--bg); color:var(--txt) }
-  main { max-width:1100px; margin:0 auto; padding:20px 16px 40px }
-  header { display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; margin-bottom:16px }
-  h1 { font-size:20px; margin:0 }
-  .badge { display:inline-block; padding:2px 10px; border-radius:999px; font-size:12px; font-weight:600; margin-left:8px; vertical-align:middle }
-  .badge.sim { background:#fff4e5; color:#8a4b00; border:1px solid #f5c27a }
-  .badge.real { background:#e7f6ec; color:#116329; border:1px solid #8fd1a4 }
-  .aviso { background:#fff4e5; color:#6b3a00; border:1px solid #f5c27a; padding:10px 12px; border-radius:8px; margin-bottom:14px }
-  @media (prefers-color-scheme: dark) { .aviso, .badge.sim { background:#2b1d08; color:#f5c27a } .badge.real { background:#0f2a18; color:#8fd1a4 } }
-  .ctrl { display:flex; flex-wrap:wrap; gap:8px; align-items:center }
-  select, input, button { font:inherit; padding:6px 10px; border:1px solid var(--brd); border-radius:6px; background:var(--card); color:var(--txt) }
-  button { cursor:pointer; font-weight:600 }
-  button.prim { background:var(--verif); color:#fff; border-color:transparent }
-  .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%,160px),1fr)); gap:12px; margin-bottom:14px }
-  .card { background:var(--card); border:1px solid var(--brd); border-radius:10px; padding:14px }
-  .k { color:var(--mut); font-size:12px; text-transform:uppercase; letter-spacing:.04em }
-  .v { font-size:24px; font-weight:700; margin-top:4px; font-variant-numeric:tabular-nums }
-  .s { color:var(--mut); font-size:12px; margin-top:2px }
-  .chart { height:360px }
-  @media (max-width:520px) { .grid { grid-template-columns:1fr 1fr } .v { font-size:18px } .chart { height:300px } }
-  .status { display:flex; flex-wrap:wrap; gap:14px; color:var(--mut); font-size:12px; margin-top:10px }
-  .dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; background:var(--ok) }
-  .dot.err { background:var(--err) } .dot.load { background:var(--warn) }
-  .erro { color:var(--err); white-space:pre-wrap; margin-top:10px; font-size:13px }
-
-  .login { max-width:360px; margin:10vh auto 0 }
-  .login h1 { margin-bottom:4px }
-  .login p { color:var(--mut); margin:0 0 16px }
-  .login label { display:block; font-size:12px; color:var(--mut); margin:10px 0 4px }
-  .login input { width:100% }
-  .login button { width:100%; margin-top:16px; padding:9px }
-  .login .sec { background:transparent; color:var(--mut); border:1px dashed var(--brd); margin-top:8px; font-weight:500 }
-  .login .nota { font-size:12px; color:var(--mut); margin-top:14px }
-  .usr { color:var(--mut); font-size:12px }
-  .lnk { background:none; border:none; color:var(--verif); padding:0 4px; font-weight:500 }
-  .nota-reg { color:var(--mut); font-size:12px; margin:-6px 0 12px }
-</style>
 </head>
 <body>
-<main id="telaLogin" class="login" hidden>
-  <div class="card">
-    <h1>Painel de Carga ONS</h1>
-    <p>Entre com seu usuário e senha do SINtegre.</p>
-    <form id="formLogin" autocomplete="on">
-      <label for="usuario">Usuário (e-mail do SINtegre)</label>
-      <input id="usuario" name="username" autocomplete="username" required>
-      <label for="senha">Senha</label>
-      <input id="senha" name="password" type="password" autocomplete="current-password" required>
-      <button id="btnEntrar" class="prim" type="submit">Entrar</button>
-      <button id="btnDemo" class="sec" type="button">Ver demonstração (dados simulados)</button>
-    </form>
-    <div id="erroLogin" class="erro" hidden></div>
-    <div class="nota">A senha vai direto para a API do ONS e não é gravada. O painel guarda só o token de acesso, criptografado num cookie seguro, por até 8 h.</div>
-  </div>
-</main>
 
-<main id="telaPainel" hidden>
-  <header>
-    <h1>Carga verificada × prevista <span id="badge" class="badge">…</span></h1>
-    <div class="ctrl">
-      <select id="regiao" aria-label="Região"></select>
-      <input id="dia" type="date" aria-label="Dia">
-      <select id="intervalo" aria-label="Atualização automática">
-        <option value="0">Auto: desligado</option>
-        <option value="60" selected>Auto: 1 min</option>
-        <option value="300">Auto: 5 min</option>
-      </select>
-      <button id="btn" class="prim">Atualizar agora</button>
-      <span class="usr"><span id="usr"></span><button id="sair" class="lnk">Sair</button></span>
+<!-- ============ LOGIN ============ -->
+<div id="telaLogin" class="login" hidden>
+  <aside class="login-foto">
+    <div class="marca marca-clara">
+      <img class="logo" src="img/eneva-logo.svg" alt="Eneva" width="158" height="50">
+      <span class="marca-sep" aria-hidden="true"></span>
+      <span>Painel de Carga</span>
+    </div>
+    <div class="login-chamada">
+      <p class="sobre">Dados oficiais do ONS</p>
+      <h1>Carga do Amazonas, Amapá e Roraima: verificada e prevista, lado a lado.</h1>
+      <ul class="fatos">
+        <li><b>1 min</b><span>atualização automática</span></li>
+        <li><b>3 áreas</b><span>somadas ou separadas</span></li>
+        <li><b>8 h</b><span>de sessão segura</span></li>
+      </ul>
+    </div>
+  </aside>
+
+  <main class="login-form">
+    <div class="login-caixa">
+      <h2>Entrar</h2>
+      <p class="mut">Use seu usuário e senha do SINtegre.</p>
+      <form id="formLogin" autocomplete="on" novalidate>
+        <label for="usuario">Usuário (e-mail do SINtegre)</label>
+        <input id="usuario" name="username" type="email" inputmode="email" autocomplete="username" required>
+        <label for="senha">Senha</label>
+        <div class="senha">
+          <input id="senha" name="password" type="password" autocomplete="current-password" required>
+          <button id="verSenha" class="olho" type="button" aria-label="Mostrar senha" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+        </div>
+        <div id="erroLogin" class="erro" role="alert" hidden></div>
+        <button id="btnEntrar" class="btn btn-prim btn-largo" type="submit">Entrar</button>
+        <div class="ou"><span>ou</span></div>
+        <button id="btnDemo" class="btn btn-sec btn-largo" type="button">Ver demonstração</button>
+        <p class="nota-demo">A demonstração usa dados simulados.</p>
+      </form>
+      <p class="nota">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+        <span>A senha vai direto para a API do ONS e não é gravada. O painel guarda só o token de acesso, criptografado num cookie seguro, por até 8 horas.</span>
+      </p>
+    </div>
+  </main>
+</div>
+
+<!-- ============ PAINEL ============ -->
+<div id="telaPainel" class="painel" hidden>
+  <header class="topo">
+    <div class="topo-in">
+      <div class="marca marca-clara">
+        <img class="logo" src="img/eneva-logo.svg" alt="Eneva" width="158" height="50">
+        <span class="marca-sep" aria-hidden="true"></span>
+        <span>Painel de Carga</span>
+        <span id="badge" class="badge">…</span>
+      </div>
+      <div class="conta">
+        <span id="usr" class="usr"></span>
+        <button id="sair" class="btn btn-fantasma" type="button">Sair</button>
+      </div>
     </div>
   </header>
-  <div class="nota-reg" id="notaReg"></div>
 
-  <div id="aviso" class="aviso" hidden>
-    <b>Dados simulados.</b> Você entrou no modo demonstração: os números são inventados só para ver a tela.
-    Entre com seu login do SINtegre para ver os dados reais do ONS.
-  </div>
-
-  <div class="grid">
-    <div class="card"><div class="k">Última verificada</div><div class="v" id="kV">–</div><div class="s" id="kVt">–</div></div>
-    <div class="card"><div class="k">Prevista no mesmo instante</div><div class="v" id="kP">–</div><div class="s">MW</div></div>
-    <div class="card"><div class="k">Desvio</div><div class="v" id="kD">–</div><div class="s">verificada − prevista</div></div>
-    <div class="card"><div class="k">Pico verificado do dia</div><div class="v" id="kM">–</div><div class="s" id="kMt">–</div></div>
-  </div>
-
-  <div class="card">
-    <div class="chart"><canvas id="graf"></canvas></div>
-    <div class="status">
-      <span><span id="dot" class="dot load"></span><span id="st">carregando…</span></span>
-      <span id="consulta"></span>
-      <span id="prox"></span>
-      <span id="regs"></span>
+  <main class="conteudo">
+    <div id="aviso" class="aviso" hidden>
+      <b>Modo demonstração.</b> Os números abaixo são simulados. Entre com seu login do SINtegre para ver os dados reais do ONS.
     </div>
-    <div id="erro" class="erro" hidden></div>
-  </div>
-</main>
+
+    <section class="barra" aria-label="Filtros">
+      <div>
+        <h1 class="titulo">Carga verificada × prevista</h1>
+        <p class="nota-reg" id="notaReg"></p>
+      </div>
+      <div class="filtros">
+        <fieldset class="seg" id="regiao">
+          <legend class="sr">Região</legend>
+        </fieldset>
+        <div class="filtros-l2">
+          <label class="campo"><span>Dia</span><input id="dia" type="date"></label>
+          <label class="campo"><span>Atualizar</span>
+            <select id="intervalo">
+              <option value="0">Desligado</option>
+              <option value="60" selected>A cada 1 min</option>
+              <option value="300">A cada 5 min</option>
+            </select>
+          </label>
+          <button id="btn" class="btn btn-prim btn-ico" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span>Atualizar agora</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="kpis" aria-label="Resumo">
+      <div class="kpi kpi-dest">
+        <div class="k">Última verificada</div>
+        <div class="v carregando" id="kV">–</div>
+        <div class="s" id="kVt">–</div>
+      </div>
+      <div class="kpi">
+        <div class="k">Prevista no mesmo instante</div>
+        <div class="v carregando" id="kP">–</div>
+        <div class="s">carga programada</div>
+      </div>
+      <div class="kpi">
+        <div class="k">Desvio</div>
+        <div class="v carregando" id="kD">–</div>
+        <div class="s"><span id="kDp" class="chip">–</span> verificada − prevista</div>
+      </div>
+      <div class="kpi">
+        <div class="k">Pico verificado do dia</div>
+        <div class="v carregando" id="kM">–</div>
+        <div class="s" id="kMt">–</div>
+      </div>
+    </section>
+
+    <section class="cartao grafico" aria-label="Curva do dia">
+      <div class="graf-topo">
+        <h2>Curva do dia <span id="diaTxt" class="mut"></span></h2>
+        <ul class="legenda" aria-hidden="true">
+          <li><i class="lv"></i>Verificada</li>
+          <li><i class="lp"></i>Prevista (programada)</li>
+        </ul>
+      </div>
+      <div class="chart"><canvas id="graf" role="img" aria-label="Gráfico de linhas da carga verificada e prevista ao longo do dia, em MW"></canvas></div>
+      <div id="erro" class="erro" role="alert" hidden></div>
+      <footer class="status">
+        <span class="st"><span id="dot" class="dot load"></span><span id="st">carregando…</span></span>
+        <span id="consulta"></span>
+        <span id="prox"></span>
+        <span id="regs" class="regs"></span>
+      </footer>
+    </section>
+  </main>
+</div>
 
 <script src="app.js"></script>
 </body>

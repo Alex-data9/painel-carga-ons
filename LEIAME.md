@@ -19,7 +19,7 @@ Os dicionários de dados do ONS (Carga Verificada e Carga Programada) listam AM,
 A opção "soma" junta as três por horário, só quando as três têm o dado.
 
 ## Arquivos
-- `index.html`, `app.js`: tela de login e painel
+- `index.html`, `app.js`, `estilo.css`: tela de login e painel (fonte Manrope local em `fonts/`; logo e foto de usina da Eneva em `img/`)
 - `api/login.js`, `api/logout.js`, `api/sessao.js`, `api/carga.js`: funções serverless (Node 22, sem dependências)
 - `api/_lib/`: sessão em cookie, cliente da API do ONS, lista de regiões
 - `vercel.json`: região gru1 (São Paulo) e cabeçalhos de segurança
