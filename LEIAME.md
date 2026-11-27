@@ -21,6 +21,8 @@ Sem login: botão "Ver demonstração" mostra dados SIMULADOS.
 - Zoom: arrastar sobre o gráfico, Ctrl + roda, pinça no celular, botões + / − / Dia inteiro (sincronizado entre os três, opcional). Shift + arrastar move a janela.
 - Tema: botão sol/lua no topo alterna modo claro e escuro (verde-petróleo); sem escolha salva, segue o tema do sistema (`tema.js`).
 - Medição de Δ: clique em dois pontos do mesmo gráfico (podem ser de curvas diferentes).
+- Aba **Geração Norte**: geração hidráulica, térmica, eólica e solar (áreas empilhadas ou linhas) e a carga do subsistema Norte, minuto a minuto, só o dia de hoje. `GET /api/geracao?sub=Norte` busca no servidor os conjuntos públicos do ONS `Geracao_Norte_<Fonte>_json` e `Carga_Norte_json` (em `https://tr.ons.org.br/Content/Get/…`, sem token; HTTP 204 = fonte sem usina, ex.: nuclear), com cache de 60 s. Para outro subsistema (SIN, Nordeste, SudesteECentroOeste, Sul), acrescente-o em `SUBSISTEMAS` em `api/geracao.js`.
+- Aba **Cruzamento** (só hoje): junta `/api/geracao?sub=Norte` e `/api/carga?regiao=AM_AP_RR` no navegador. A geração e a carga do Norte (por minuto) viram médias de cada semi-hora `[t, t + 30 min)` (só com 20 minutos ou mais) e são casadas com o instante `t` da carga verificada. Mostra a geração do Norte empilhada com a carga do Norte e a carga medida de AM + AP + RR, e um gráfico em % com a participação dos três estados na carga do Norte e a cobertura térmica (térmica do Norte ÷ carga dos três estados; é um indicador, não a origem da energia). Cartões: carga dos três estados, participação, cobertura térmica, saldo do Norte (geração − carga) e o saldo no pico dos três estados.
 - `GET /api/carga?regiao=AM_AP_RR&dia=AAAA-MM-DD&separado=1` devolve uma série por área.
 
 ## Regiões

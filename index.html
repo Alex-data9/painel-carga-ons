@@ -83,18 +83,32 @@
     </div>
   </header>
 
-  <main class="conteudo">
+  <main class="conteudo" id="conteudo" data-aba="carga">
     <div id="aviso" class="aviso" hidden>
-      <b>Modo demonstração.</b> Os números abaixo são simulados. Entre com seu login do SINtegre para ver os dados reais do ONS.
+      <b>Modo demonstração.</b> Os números de carga (AM, AP e RR) são simulados; entre com seu login do SINtegre para ver os reais. A aba Geração Norte já usa os dados públicos do ONS; no Cruzamento, a geração é real e a carga dos três estados, simulada.
+    </div>
+
+    <div class="abas" role="tablist" aria-label="Seção">
+      <button id="aba-carga" class="aba" role="tab" type="button" aria-selected="true" data-aba="carga">Carga AM, AP e RR</button>
+      <button id="aba-ger" class="aba" role="tab" type="button" aria-selected="false" data-aba="ger">Geração Norte</button>
+        <button id="aba-cruz" class="aba" role="tab" type="button" aria-selected="false" data-aba="cruz">Cruzamento</button>
     </div>
 
     <section class="barra" aria-label="Filtros">
-      <div class="barra-tit">
+      <div class="barra-tit" data-so="carga">
         <h1 class="titulo">Carga do Amazonas, Amapá e Roraima</h1>
         <p class="nota-reg">Carga medida, MMGD, carga com MMGD e carga programada do ONS, por semi-hora.</p>
       </div>
+      <div class="barra-tit" data-so="ger">
+        <h1 class="titulo">Geração do subsistema Norte</h1>
+        <p class="nota-reg">Geração hidráulica, térmica, eólica e solar e a carga do subsistema Norte, minuto a minuto, no dia de hoje (dados públicos do ONS).</p>
+      </div>
+      <div class="barra-tit" data-so="cruz">
+        <h1 class="titulo">Geração do Norte × carga de AM, AP e RR</h1>
+        <p class="nota-reg">Quanto os três estados pesam na carga do subsistema Norte, quanto da carga deles a térmica do Norte cobriria e se o Norte exporta ou importa energia. Hoje, em médias de 30 minutos.</p>
+      </div>
       <div class="filtros">
-        <div class="diaNav" role="group" aria-label="Dia">
+        <div class="diaNav" role="group" aria-label="Dia" data-so="carga">
           <button id="diaAnt" class="btn btn-sec btn-ico" type="button" aria-label="Dia anterior">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Anterior</span>
           </button>
@@ -104,7 +118,7 @@
           </button>
           <input id="dia" type="date" aria-label="Escolher dia">
         </div>
-        <fieldset class="seg" id="visao">
+        <fieldset class="seg" id="visao" data-so="carga">
           <legend class="sr">Visualização</legend>
           <input type="radio" name="visao" id="vis-areas" value="areas" checked><label for="vis-areas">Três estados</label>
           <input type="radio" name="visao" id="vis-AM" value="AM"><label for="vis-AM">Amazonas</label>
@@ -128,10 +142,61 @@
 
     <div id="erro" class="erro" role="alert" hidden></div>
 
-    <div class="paineis-barra">
+    <div class="paineis-barra" data-so="carga">
       <button id="recTodos" class="ab" type="button">Recolher todas as informações</button>
     </div>
-    <section id="paineis" class="paineis" aria-label="Gráficos por área"></section>
+    <section id="paineis" class="paineis" aria-label="Gráficos por área" data-so="carga"></section>
+
+    <section id="secGer" class="paineis um" aria-label="Geração por fonte" data-so="ger">
+      <article class="area" data-area="GER" style="--cor-area: #ffb500">
+        <header class="area-top">
+          <div><h2 class="area-nome">Subsistema Norte</h2><span class="area-cod">Hoje, minuto a minuto</span></div>
+          <div class="acoes">
+            <button class="ab ab-empilhar" id="gerEmpilhar" type="button" aria-pressed="true">Empilhado</button>
+          </div>
+          <div class="zoom" role="group" aria-label="Zoom do gráfico">
+            <button class="zb" data-z="out" type="button" aria-label="Diminuir zoom">−</button>
+            <button class="zb" data-z="in" type="button" aria-label="Aumentar zoom">+</button>
+            <button class="zb zr" data-z="reset" type="button">Dia inteiro</button>
+          </div>
+        </header>
+        <div class="info">
+          <div class="metricas" id="gerCards"></div>
+          <p class="ref" id="gerRef"></p>
+        </div>
+        <div class="chart chart-ger"><canvas id="gerGraf" role="img" aria-label="Gráfico de área empilhada da geração por fonte e linha da carga do subsistema, em MW"></canvas></div>
+      </article>
+    </section>
+
+    <section id="secCruz" class="paineis um" aria-label="Cruzamento de geração e carga" data-so="cruz">
+      <article class="area" data-area="CZG" style="--cor-area: #8a7fbf">
+        <header class="area-top">
+          <div><h2 class="area-nome">Geração Norte e carga dos três estados</h2><span class="area-cod">Hoje, médias de 30 minutos</span></div>
+          <div class="zoom" role="group" aria-label="Zoom do gráfico">
+            <button class="zb" data-z="out" type="button" aria-label="Diminuir zoom">−</button>
+            <button class="zb" data-z="in" type="button" aria-label="Aumentar zoom">+</button>
+            <button class="zb zr" data-z="reset" type="button">Dia inteiro</button>
+          </div>
+        </header>
+        <div class="info">
+          <div class="metricas" id="czCards"></div>
+          <p class="ref" id="czRef"></p>
+        </div>
+        <div class="chart chart-ger"><canvas id="czGraf" role="img" aria-label="Geração do Norte por fonte empilhada, com as linhas da carga do Norte e da carga de AM, AP e RR, em MW"></canvas></div>
+      </article>
+      <article class="area" data-area="CZP" style="--cor-area: #8a7fbf">
+        <header class="area-top">
+          <div><h2 class="area-nome">Indicadores ao longo do dia</h2><span class="area-cod">Participação na carga do Norte e cobertura térmica, em %</span></div>
+          <div class="zoom" role="group" aria-label="Zoom do gráfico">
+            <button class="zb" data-z="out" type="button" aria-label="Diminuir zoom">−</button>
+            <button class="zb" data-z="in" type="button" aria-label="Aumentar zoom">+</button>
+            <button class="zb zr" data-z="reset" type="button">Dia inteiro</button>
+          </div>
+        </header>
+        <div class="chart"><canvas id="czPct" role="img" aria-label="Participação de AM, AP e RR na carga do Norte e cobertura térmica, em porcentagem"></canvas></div>
+        <p class="ref cz-nota">A cobertura térmica é um indicador, não a origem da energia: compara a geração térmica de todo o Norte com a carga dos três estados.</p>
+      </article>
+    </section>
 
     <section class="cartao medicao" aria-label="Medição de delta">
       <div class="med-txt">
