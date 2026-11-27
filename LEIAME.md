@@ -14,6 +14,15 @@ Sem login: botão "Ver demonstração" mostra dados SIMULADOS.
   Chave: variável de ambiente `SESSION_SECRET` (tipo sensitive). Trocar essa variável derruba todas as sessões.
 - Sessão dura no máximo 8 h; o token é renovado via `/renovar` automaticamente.
 
+## Painel
+- Três gráficos lado a lado (Amazonas, Amapá, Roraima), um estado em foco (botão Focar ou seletor) ou a soma AM + AP + RR.
+- Botão Recolher em cada estado (e "Recolher todas as informações") esconde os cartões e deixa só o gráfico; a escolha fica salva no navegador.
+- Curvas: carga medida (`val_cargaglobalsmmg`, líquida de MMGD), carga com MMGD (`val_cargaglobal`) e carga programada; cartões com MMGD (`val_cargammgd`), Δ medida − programada e Δ com MMGD − medida.
+- Zoom: arrastar sobre o gráfico, Ctrl + roda, pinça no celular, botões + / − / Dia inteiro (sincronizado entre os três, opcional). Shift + arrastar move a janela.
+- Tema: botão sol/lua no topo alterna modo claro e escuro (verde-petróleo); sem escolha salva, segue o tema do sistema (`tema.js`).
+- Medição de Δ: clique em dois pontos do mesmo gráfico (podem ser de curvas diferentes).
+- `GET /api/carga?regiao=AM_AP_RR&dia=AAAA-MM-DD&separado=1` devolve uma série por área.
+
 ## Regiões
 Os dicionários de dados do ONS (Carga Verificada e Carga Programada) listam AM, AP e RR como áreas de carga (`cod_areacarga`).
 A opção "soma" junta as três por horário, só quando as três têm o dado.
